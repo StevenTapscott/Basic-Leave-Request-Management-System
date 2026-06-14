@@ -1,0 +1,85 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedcommondataserviceforapps_32708"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "actions": {
+        "Condition": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@triggerOutputs()?['body/crf83_rejected']",
+                  "Yes"
+                ]
+              }
+            ]
+          },
+          "actions": {},
+          "else": {
+            "actions": {
+              "Update_a_row": {
+                "type": "OpenApiConnection",
+                "inputs": {
+                  "parameters": {
+                    "entityName": "crf83_leaverequests",
+                    "recordId": "@triggerOutputs()?['body/crf83_leaverequestid']",
+                    "item/crf83_rejected": true
+                  },
+                  "host": {
+                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                    "operationId": "UpdateOnlyRecord",
+                    "connectionName": "shared_commondataserviceforapps"
+                  }
+                }
+              }
+            }
+          },
+          "runAfter": {}
+        }
+      },
+      "triggers": {
+        "When_a_row_is_added,_modified_or_deleted": {
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "parameters": {
+              "subscriptionRequest/message": 3,
+              "subscriptionRequest/entityname": "crf83_leaverequest",
+              "subscriptionRequest/scope": 4
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "SubscribeWebhookTrigger",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          }
+        }
+      },
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
